@@ -1,6 +1,39 @@
 @import "tailwindcss";
 
 @layer base {
+  .article-body {
+    columns: 2;
+    column-gap: 2em;
+    column-rule: 1px solid #d6d3d1;
+    line-height: 1.75;
+    text-align: justify;
+    hyphens: auto;
+  }
+
+  .article-body p {
+    margin-bottom: 0.8em;
+    text-indent: 1.5em;
+  }
+
+  .article-body p:first-child {
+    text-indent: 0;
+  }
+
+  .article-body p:first-child::first-letter {
+    float: left;
+    font-size: 3.2em;
+    line-height: 0.8;
+    padding-right: 0.08em;
+    padding-top: 0.05em;
+    font-weight: 700;
+  }
+
+  .article-end::after {
+    content: "■";
+    font-size: 0.7em;
+    margin-left: 0.3em;
+  }
+
   .prose {
     line-height: 1.8;
   }
