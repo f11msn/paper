@@ -1,6 +1,7 @@
+<div data-controller="generator">
 <h2 class="text-2xl font-bold mb-6">Генератор статей</h2>
 
-<%= form_with(model: @article, class: "space-y-6 max-w-3xl", data: { controller: "generator", generator_target: "form" }) do |f| %>
+<%= form_with(model: @article, class: "space-y-6 max-w-3xl", data: { generator_target: "form" }) do |f| %>
   <% if @article.errors.any? %>
     <div class="bg-red-50 border border-red-200 text-red-800 p-4 rounded font-sans text-sm">
       <% @article.errors.full_messages.each do |msg| %>
@@ -63,4 +64,5 @@
   <h3 class="text-lg font-bold mb-4 font-sans">Генерация в реальном времени:</h3>
   <div class="bg-white border border-stone-200 rounded p-6 prose max-w-none" data-generator-target="content">
   </div>
+</div>
 </div>
