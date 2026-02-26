@@ -21,7 +21,7 @@
         </div>
         <h3 class="text-xl font-bold mb-2"><%= article.topic %></h3>
         <% if article.content.present? %>
-          <p class="text-stone-600 text-sm line-clamp-3"><%= truncate(article.content, length: 200) %></p>
+          <p class="text-stone-600 text-sm line-clamp-3"><%= truncate(strip_markdown(article.content), length: 200) %></p>
         <% end %>
         <div class="mt-3 font-sans text-xs text-stone-400">
           Модель: <%= article.model %> • T=<%= article.temperature %> • max_tokens=<%= article.max_tokens %>
