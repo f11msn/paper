@@ -16,7 +16,7 @@
 
       <% if @article.content.present? %>
         <div class="prose max-w-none leading-relaxed">
-          <%= simple_format(@article.content) %>
+          <%= render_markdown(@article.content) %>
         </div>
       <% else %>
         <p class="text-stone-400 italic">Статья не была сгенерирована</p>

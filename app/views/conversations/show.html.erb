@@ -18,8 +18,8 @@
               <p class="text-[10px] uppercase tracking-wider mb-1 <%= message.role == 'user' ? 'text-stone-400' : 'text-stone-500' %> font-sans">
                 <%= message.role %>
               </p>
-              <div class="text-sm">
-                <%= simple_format(message.content) %>
+              <div class="text-sm prose prose-sm max-w-none <%= message.role == 'user' ? 'prose-invert' : '' %>">
+                <%= render_markdown(message.content) %>
               </div>
             </div>
           </div>
