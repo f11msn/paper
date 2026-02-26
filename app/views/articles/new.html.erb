@@ -1,0 +1,66 @@
+<h2 class="text-2xl font-bold mb-6">Генератор статей</h2>
+
+<%= form_with(model: @article, class: "space-y-6 max-w-3xl", data: { controller: "generator", generator_target: "form" }) do |f| %>
+  <% if @article.errors.any? %>
+    <div class="bg-red-50 border border-red-200 text-red-800 p-4 rounded font-sans text-sm">
+      <% @article.errors.full_messages.each do |msg| %>
+        <p><%= msg %></p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-2 gap-6">
+    <div>
+      <label class="block font-sans text-sm font-medium mb-1">Тема статьи</label>
+      <%= f.text_field :topic, class: "w-full border border-stone-300 rounded px-3 py-2 font-sans text-sm focus:outline-none focus:ring-2 focus:ring-stone-400", placeholder: "Рост цен на нефть" %>
+    </div>
+    <div>
+      <label class="block font-sans text-sm font-medium mb-1">Рубрика</label>
+      <%= f.select :rubric, Article::RUBRICS, {}, class: "w-full border border-stone-300 rounded px-3 py-2 font-sans text-sm focus:outline-none focus:ring-2 focus:ring-stone-400" %>
+    </div>
+  </div>
+
+  <div>
+    <label class="block font-sans text-sm font-medium mb-1">
+      System Message
+      <span class="text-stone-400 font-normal">— инструкция модели, задаёт поведение и стиль</span>
+    </label>
+    <%= f.text_area :system_prompt, rows: 8, class: "w-full border border-stone-300 rounded px-3 py-2 font-sans text-sm font-mono focus:outline-none focus:ring-2 focus:ring-stone-400" %>
+    <p class="text-xs text-stone-400 mt-1 font-sans">
+      💡 <strong>System message</strong> — это первое сообщение в массиве messages с role="system". Модель использует его как базовую инструкцию. Попробуйте изменить промпт и увидите разницу в стиле.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-3 gap-6">
+    <div>
+      <label class="block font-sans text-sm font-medium mb-1">
+        Temperature: <span data-generator-target="temperatureValue"><%= @article.temperature %></span>
+      </label>
+      <%= f.range_field :temperature, min: 0, max: 2, step: 0.1, class: "w-full", data: { action: "input->generator#updateTemperature" } %>
+      <p class="text-xs text-stone-400 mt-1 font-sans">0 = детерминированно, 2 = максимально креативно</p>
+    </div>
+    <div>
+      <label class="block font-sans text-sm font-medium mb-1">Max Tokens</label>
+      <%= f.number_field :max_tokens, min: 100, max: 16000, step: 100, class: "w-full border border-stone-300 rounded px-3 py-2 font-sans text-sm focus:outline-none focus:ring-2 focus:ring-stone-400" %>
+      <p class="text-xs text-stone-400 mt-1 font-sans">Максимальная длина ответа модели</p>
+    </div>
+    <div>
+      <label class="block font-sans text-sm font-medium mb-1">Модель</label>
+      <%= f.text_field :model, class: "w-full border border-stone-300 rounded px-3 py-2 font-sans text-sm focus:outline-none focus:ring-2 focus:ring-stone-400" %>
+      <p class="text-xs text-stone-400 mt-1 font-sans">OpenRouter model ID</p>
+    </div>
+  </div>
+
+  <div class="flex gap-4">
+    <%= f.submit "Сгенерировать (с Tool Calling)", class: "bg-stone-900 text-white px-6 py-3 rounded font-sans text-sm hover:bg-stone-700 cursor-pointer" %>
+    <button type="button" class="bg-white border border-stone-300 text-stone-700 px-6 py-3 rounded font-sans text-sm hover:bg-stone-50 cursor-pointer" data-action="generator#streamGenerate">
+      Сгенерировать (Streaming)
+    </button>
+  </div>
+<% end %>
+
+<div id="streaming-output" class="mt-8 hidden" data-generator-target="output">
+  <h3 class="text-lg font-bold mb-4 font-sans">Генерация в реальном времени:</h3>
+  <div class="bg-white border border-stone-200 rounded p-6 prose max-w-none" data-generator-target="content">
+  </div>
+</div>

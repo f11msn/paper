@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Ъ Paper" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="application-name" content="Paper">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= yield :head %>
+    <link rel="icon" href="/icon.png" type="image/png">
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="bg-stone-50 text-stone-900 min-h-screen font-serif">
+    <header class="border-b-2 border-stone-900 bg-white">
+      <div class="max-w-5xl mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <%= link_to root_path, class: "no-underline" do %>
+              <h1 class="text-3xl font-bold tracking-tight" style="font-family: Georgia, serif;">Ъ Paper</h1>
+              <p class="text-xs text-stone-500 tracking-widest uppercase">Генератор статей • AI Edition</p>
+            <% end %>
+          </div>
+          <nav class="flex gap-6 text-sm font-sans">
+            <%= link_to "Генератор", new_article_path, class: "hover:text-stone-600 #{request.path.include?('articles/new') ? 'font-bold border-b-2 border-stone-900' : ''}" %>
+            <%= link_to "Архив", articles_path, class: "hover:text-stone-600 #{request.path == articles_path ? 'font-bold border-b-2 border-stone-900' : ''}" %>
+            <%= link_to "Чат с редактором", conversations_path, class: "hover:text-stone-600 #{request.path.include?('conversations') ? 'font-bold border-b-2 border-stone-900' : ''}" %>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 py-8">
+      <% if flash[:notice] %>
+        <div class="mb-4 p-3 bg-green-50 border border-green-200 text-green-800 rounded font-sans text-sm">
+          <%= flash[:notice] %>
+        </div>
+      <% end %>
+      <% if flash[:alert] %>
+        <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-800 rounded font-sans text-sm">
+          <%= flash[:alert] %>
+        </div>
+      <% end %>
+
+      <%= yield %>
+    </main>
+
+    <footer class="border-t border-stone-200 mt-16">
+      <div class="max-w-5xl mx-auto px-6 py-6 text-center text-xs text-stone-400 font-sans">
+        Ъ Paper — учебный проект для изучения OpenAI API протокола.
+        DeepSeek через OpenRouter.
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,96 @@
+class ArticlesController < ApplicationController
+  include ActionController::Live
+
+  def index
+    @articles = Article.order(created_at: :desc)
+  end
+
+  def show
+    @article = Article.find(params[:id])
+  end
+
+  def new
+    @article = Article.new(
+      system_prompt: ArticleGenerator::DEFAULT_SYSTEM_PROMPT,
+      temperature: 0.7,
+      max_tokens: 4096,
+      model: OpenaiClient::DEFAULT_MODEL
+    )
+  end
+
+  def create
+    @article = Article.new(article_params)
+    @article.status = "generating"
+
+    if @article.save
+      begin
+        client = OpenaiClient.new(
+          api_key: ENV.fetch("OPENROUTER_API_KEY"),
+          model: @article.model
+        )
+        generator = ArticleGenerator.new(client:)
+        result = generator.generate(
+          topic: @article.topic,
+          rubric: @article.rubric,
+          system_prompt: @article.system_prompt,
+          temperature: @article.temperature,
+          max_tokens: @article.max_tokens
+        )
+
+        @article.update!(
+          content: result[:content],
+          api_log: result[:api_log],
+          tool_calls_log: result[:tool_calls_log],
+          status: "completed"
+        )
+      rescue StandardError => e
+        @article.update!(status: "failed", content: "Ошибка: #{e.message}")
+      end
+
+      redirect_to @article
+    else
+      render :new, status: :unprocessable_entity
+    end
+  end
+
+  def stream
+    @article = Article.find(params[:id])
+
+    response.headers["Content-Type"] = "text/event-stream"
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["X-Accel-Buffering"] = "no"
+
+    client = OpenaiClient.new(
+      api_key: ENV.fetch("OPENROUTER_API_KEY"),
+      model: @article.model
+    )
+    generator = ArticleGenerator.new(client:)
+
+    full_content = +""
+
+    generator.generate_streaming(
+      topic: @article.topic,
+      rubric: @article.rubric,
+      system_prompt: @article.system_prompt,
+      temperature: @article.temperature,
+      max_tokens: @article.max_tokens
+    ) do |chunk|
+      full_content << chunk
+      response.stream.write("data: #{chunk.to_json}\n\n")
+    end
+
+    response.stream.write("data: [DONE]\n\n")
+
+    @article.update!(content: full_content, status: "completed")
+  rescue ActionController::Live::ClientDisconnected, IOError
+    # Client disconnected
+  ensure
+    response.stream.close
+  end
+
+  private
+
+  def article_params
+    params.require(:article).permit(:topic, :rubric, :system_prompt, :temperature, :max_tokens, :model)
+  end
+end

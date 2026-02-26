@@ -1,0 +1,26 @@
+<div class="flex justify-between items-center mb-8">
+  <h2 class="text-2xl font-bold">Чат с редактором</h2>
+  <%= link_to "Новый чат", new_conversation_path, class: "bg-stone-900 text-white px-4 py-2 rounded font-sans text-sm hover:bg-stone-700" %>
+</div>
+
+<% if @conversations.empty? %>
+  <div class="text-center py-16 text-stone-400">
+    <p class="text-lg mb-2">Пока нет чатов</p>
+    <p class="text-sm">Начните новый чат с AI-редактором Коммерсанта</p>
+  </div>
+<% else %>
+  <div class="space-y-4">
+    <% @conversations.each do |conv| %>
+      <div class="flex items-center justify-between border border-stone-200 bg-white p-4 rounded hover:shadow-md transition-shadow">
+        <%= link_to conversation_path(conv), class: "flex-1" do %>
+          <h3 class="font-bold"><%= conv.title %></h3>
+          <p class="text-sm text-stone-500 font-sans">
+            <%= conv.messages.count %> сообщений •
+            <%= conv.created_at.strftime("%d.%m.%Y %H:%M") %>
+          </p>
+        <% end %>
+        <%= button_to "Удалить", conversation_path(conv), method: :delete, class: "text-red-500 hover:text-red-700 text-sm font-sans", data: { turbo_confirm: "Удалить чат?" } %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

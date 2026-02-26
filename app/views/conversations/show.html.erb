@@ -1,0 +1,78 @@
+<div class="mb-6">
+  <%= link_to "← Назад к чатам", conversations_path, class: "font-sans text-sm text-stone-500 hover:text-stone-700" %>
+</div>
+
+<div class="grid grid-cols-3 gap-8">
+  <%# Chat column %>
+  <div class="col-span-2">
+    <div class="bg-white border border-stone-200 rounded">
+      <div class="border-b border-stone-200 p-4">
+        <h2 class="font-bold"><%= @conversation.title %></h2>
+      </div>
+
+      <div class="p-4 space-y-4 max-h-[600px] overflow-y-auto" id="messages">
+        <% @messages.each do |message| %>
+          <% next if message.role == "system" %>
+          <div class="flex <%= message.role == 'user' ? 'justify-end' : 'justify-start' %>">
+            <div class="max-w-[80%] rounded-lg p-4 <%= message.role == 'user' ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-900' %>">
+              <p class="text-[10px] uppercase tracking-wider mb-1 <%= message.role == 'user' ? 'text-stone-400' : 'text-stone-500' %> font-sans">
+                <%= message.role %>
+              </p>
+              <div class="text-sm">
+                <%= simple_format(message.content) %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="border-t border-stone-200 p-4">
+        <%= form_with(model: [@conversation, @new_message], class: "flex gap-3") do |f| %>
+          <%= f.text_field :content, class: "flex-1 border border-stone-300 rounded px-3 py-2 font-sans text-sm focus:outline-none focus:ring-2 focus:ring-stone-400", placeholder: "Напишите сообщение...", autofocus: true %>
+          <%= f.submit "Отправить", class: "bg-stone-900 text-white px-6 py-2 rounded font-sans text-sm hover:bg-stone-700 cursor-pointer" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <%# Debug Panel %>
+  <div class="col-span-1 space-y-4">
+    <h3 class="font-sans text-sm font-bold uppercase tracking-wider text-stone-500">Debug Panel</h3>
+
+    <div class="bg-stone-800 text-stone-100 rounded p-4 text-xs font-mono">
+      <p class="text-stone-400 mb-2 font-sans uppercase tracking-wider text-[10px]">
+        System Message
+        <span class="text-amber-400">(role: "system")</span>
+      </p>
+      <pre class="whitespace-pre-wrap text-stone-300"><%= @conversation.system_prompt %></pre>
+    </div>
+
+    <div class="bg-stone-800 text-stone-100 rounded p-4 text-xs font-mono">
+      <p class="text-stone-400 mb-2 font-sans uppercase tracking-wider text-[10px]">
+        Messages Array
+        <span class="text-amber-400">(<%= @messages.count %> messages)</span>
+      </p>
+      <p class="text-stone-400 mb-2 font-sans text-[10px]">
+        Этот массив отправляется модели при каждом запросе целиком — так она «помнит» диалог.
+      </p>
+      <pre class="whitespace-pre-wrap text-stone-300 max-h-80 overflow-y-auto"><%= JSON.pretty_generate(
+        @messages.map { |m|
+          h = { role: m.role, content: m.content&.truncate(100) }
+          h[:tool_calls] = m.tool_calls if m.tool_calls.present?
+          h
+        }
+      ) %></pre>
+    </div>
+
+    <div class="bg-stone-800 text-stone-100 rounded p-4 text-xs font-mono">
+      <p class="text-stone-400 mb-2 font-sans uppercase tracking-wider text-[10px]">Как работает контекст</p>
+      <div class="text-stone-300 space-y-1 font-sans text-[11px]">
+        <p>1. <span class="text-amber-400">system</span> — задаёт роль (1 раз)</p>
+        <p>2. <span class="text-blue-400">user</span> — ваше сообщение</p>
+        <p>3. <span class="text-green-400">assistant</span> — ответ модели</p>
+        <p>4. Повтор 2-3, массив растёт</p>
+        <p>5. Весь массив → API каждый раз</p>
+      </div>
+    </div>
+  </div>
+</div>

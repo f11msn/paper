@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@layer base {
+  .prose {
+    line-height: 1.8;
+  }
+  .prose p {
+    margin-bottom: 1em;
+    text-indent: 1.5em;
+  }
+  .prose p:first-child {
+    text-indent: 0;
+    font-size: 1.1em;
+    font-weight: 500;
+  }
+}
