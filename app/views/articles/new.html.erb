@@ -41,7 +41,7 @@
     </div>
     <div>
       <label class="block font-sans text-sm font-medium mb-1">Max Tokens</label>
-      <%= f.number_field :max_tokens, min: 100, max: 16000, step: 100, class: "w-full border border-stone-300 rounded px-3 py-2 font-sans text-sm focus:outline-none focus:ring-2 focus:ring-stone-400" %>
+      <%= f.number_field :max_tokens, min: 1, max: 100000, step: 1, class: "w-full border border-stone-300 rounded px-3 py-2 font-sans text-sm focus:outline-none focus:ring-2 focus:ring-stone-400" %>
       <p class="text-xs text-stone-400 mt-1 font-sans">Максимальная длина ответа модели</p>
     </div>
     <div>
