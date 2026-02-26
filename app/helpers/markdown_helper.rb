@@ -8,8 +8,6 @@ module MarkdownHelper
   def render_markdown(text)
     return "" if text.blank?
 
-    cleaned = strip_xml_artifacts(text)
-
     markdown = Redcarpet::Markdown.new(
       Redcarpet::Render::HTML.new(hard_wrap: true),
       autolink: true,
@@ -19,22 +17,12 @@ module MarkdownHelper
       no_intra_emphasis: true
     )
 
-    sanitize(markdown.render(cleaned), tags: ALLOWED_TAGS, attributes: %w[href src alt class title])
+    sanitize(markdown.render(text), tags: ALLOWED_TAGS, attributes: %w[href src alt class title])
   end
 
   def strip_markdown(text)
     return "" if text.blank?
 
     strip_tags(render_markdown(text)).squish
-  end
-
-  private
-
-  def strip_xml_artifacts(text)
-    text
-      .gsub(%r{</?function_calls>}i, "")
-      .gsub(%r{</?invoke[^>]*>}i, "")
-      .gsub(%r{</?parameter[^>]*>}i, "")
-      .gsub(%r{</?antml:[^>]*>}i, "")
   end
 end
