@@ -23,34 +23,18 @@ class ArticlesController < ApplicationController
     @article.status = "generating"
 
     if @article.save
-      begin
-        client = OpenaiClient.new(
-          api_key: ENV.fetch("OPENROUTER_API_KEY"),
-          model: @article.model
-        )
-        generator = ArticleGenerator.new(client:)
-        result = generator.generate(
-          topic: @article.topic,
-          rubric: @article.rubric,
-          system_prompt: @article.system_prompt,
-          temperature: @article.temperature,
-          max_tokens: @article.max_tokens
-        )
-
-        @article.update!(
-          content: result[:content],
-          api_log: result[:api_log],
-          tool_calls_log: result[:tool_calls_log],
-          status: "completed"
-        )
-      rescue StandardError => e
-        @article.update!(status: "failed", content: "Ошибка: #{e.message}")
-      end
-
+      generate_article!(@article)
       redirect_to @article
     else
       render :new, status: :unprocessable_entity
     end
+  end
+
+  def retry
+    @article = Article.find(params[:id])
+    @article.update!(status: "generating", content: nil, api_log: nil, tool_calls_log: nil)
+    generate_article!(@article)
+    redirect_to @article
   end
 
   def stream
@@ -92,5 +76,29 @@ class ArticlesController < ApplicationController
 
   def article_params
     params.require(:article).permit(:topic, :rubric, :system_prompt, :temperature, :max_tokens, :model)
+  end
+
+  def generate_article!(article)
+    client = OpenaiClient.new(
+      api_key: ENV.fetch("OPENROUTER_API_KEY"),
+      model: article.model
+    )
+    generator = ArticleGenerator.new(client:)
+    result = generator.generate(
+      topic: article.topic,
+      rubric: article.rubric,
+      system_prompt: article.system_prompt,
+      temperature: article.temperature,
+      max_tokens: article.max_tokens
+    )
+
+    article.update!(
+      content: result[:content],
+      api_log: result[:api_log],
+      tool_calls_log: result[:tool_calls_log],
+      status: "completed"
+    )
+  rescue StandardError => e
+    article.update!(status: "failed", content: "Ошибка: #{e.message}")
   end
 end

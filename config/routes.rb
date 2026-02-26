@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   root "articles#index"
 
   resources :articles, only: [:index, :new, :create, :show] do
+    post :retry, on: :member
     get :stream, on: :member
   end
 

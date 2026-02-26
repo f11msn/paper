@@ -72,5 +72,39 @@ RSpec.describe "Articles", type: :request do
       get article_path(article)
       expect(response.body).to include("Debug Panel")
     end
+
+    it "shows the retry button" do
+      get article_path(article)
+      expect(response.body).to include("Сгенерировать заново")
+    end
+  end
+
+  describe "POST /articles/:id/retry" do
+    let!(:article) { create(:article, content: "Старый текст", status: "failed") }
+
+    let(:chat_response) do
+      {
+        choices: [
+          { message: { role: "assistant", content: "Новая статья" }, finish_reason: "stop" }
+        ]
+      }
+    end
+
+    before do
+      stub_request(:post, "https://openrouter.ai/api/v1/chat/completions")
+        .to_return(status: 200, body: chat_response.to_json, headers: { "Content-Type" => "application/json" })
+
+      allow(ENV).to receive(:fetch).and_call_original
+      allow(ENV).to receive(:fetch).with("OPENROUTER_API_KEY").and_return("test-key")
+    end
+
+    it "regenerates the article and redirects" do
+      post retry_article_path(article)
+
+      expect(response).to redirect_to(article_path(article))
+      article.reload
+      expect(article.status).to eq("completed")
+      expect(article.content).to eq("Новая статья")
+    end
   end
 end
