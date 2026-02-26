@@ -11,44 +11,39 @@ export default class extends Controller {
     event.preventDefault()
 
     const formData = new FormData(this.formTarget)
-    const params = new URLSearchParams()
-    params.set("topic", formData.get("article[topic]"))
-    params.set("rubric", formData.get("article[rubric]"))
-    params.set("system_prompt", formData.get("article[system_prompt]"))
-    params.set("temperature", formData.get("article[temperature]"))
-    params.set("max_tokens", formData.get("article[max_tokens]"))
-    params.set("model", formData.get("article[model]"))
 
-    // First create the article to get an ID
     const response = await fetch("/articles", {
       method: "POST",
       body: formData,
       headers: {
         "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
-        "Accept": "text/html"
-      },
-      redirect: "manual"
+        "Accept": "application/json"
+      }
     })
 
-    // Extract article ID from redirect location
-    const location = response.headers.get("Location")
-    if (!location) {
-      alert("Ошибка создания статьи")
+    const data = await response.json()
+
+    if (!response.ok || !data.id) {
+      alert(data.errors ? data.errors.join(", ") : "Ошибка создания статьи")
       return
     }
 
-    const articleId = location.split("/").pop()
-
     this.outputTarget.classList.remove("hidden")
-    this.contentTarget.innerHTML = ""
+    this.contentTarget.innerHTML = '<p class="text-stone-400 text-sm font-sans animate-pulse">Генерация...</p>'
 
-    const eventSource = new EventSource(`/articles/${articleId}/stream`)
+    const eventSource = new EventSource(`/articles/${data.id}/stream`)
 
+    let firstChunk = true
     eventSource.onmessage = (event) => {
       if (event.data === "[DONE]") {
         eventSource.close()
-        this.contentTarget.innerHTML += '<p class="mt-4 text-stone-400 text-sm font-sans">✓ Генерация завершена</p>'
+        this.contentTarget.innerHTML += '<p class="mt-4 text-stone-400 text-sm font-sans">✓ Генерация завершена. <a href="/articles/' + data.id + '" class="underline">Открыть статью →</a></p>'
         return
+      }
+
+      if (firstChunk) {
+        this.contentTarget.innerHTML = ""
+        firstChunk = false
       }
 
       const text = JSON.parse(event.data)

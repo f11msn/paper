@@ -23,10 +23,18 @@ class ArticlesController < ApplicationController
     @article.status = "generating"
 
     if @article.save
-      generate_article!(@article)
-      redirect_to @article
+      respond_to do |format|
+        format.json { render json: { id: @article.id } }
+        format.html do
+          generate_article!(@article)
+          redirect_to @article
+        end
+      end
     else
-      render :new, status: :unprocessable_entity
+      respond_to do |format|
+        format.json { render json: { errors: @article.errors.full_messages }, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_entity }
+      end
     end
   end
 
