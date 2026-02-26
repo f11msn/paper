@@ -3,7 +3,7 @@ Rails.application.routes.draw do
 
   resources :articles, only: [:index, :new, :create, :show] do
     post :retry, on: :member
-    get :stream, on: :member
+    resource :stream, only: [:show], controller: "article_streams"
   end
 
   resources :conversations, only: [:index, :new, :create, :show, :destroy] do

@@ -11,20 +11,34 @@ export default class extends Controller {
     event.preventDefault()
 
     const formData = new FormData(this.formTarget)
+    const csrfToken = formData.get("authenticity_token") || document.querySelector('meta[name="csrf-token"]')?.content
 
     const response = await fetch("/articles", {
       method: "POST",
       body: formData,
       headers: {
-        "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
+        "X-CSRF-Token": csrfToken,
         "Accept": "application/json"
       }
     })
 
+    if (!response.ok) {
+      const text = await response.text()
+      let errorMsg
+      try {
+        const json = JSON.parse(text)
+        errorMsg = json.errors ? json.errors.join(", ") : `HTTP ${response.status}`
+      } catch {
+        errorMsg = `HTTP ${response.status}: ${text.substring(0, 200)}`
+      }
+      alert("Ошибка: " + errorMsg)
+      return
+    }
+
     const data = await response.json()
 
-    if (!response.ok || !data.id) {
-      alert(data.errors ? data.errors.join(", ") : "Ошибка создания статьи")
+    if (!data.id) {
+      alert("Ошибка: сервер не вернул ID статьи")
       return
     }
 
