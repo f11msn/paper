@@ -1,4 +1,6 @@
 class PdfExporter
+  HEADING_RE = /^\#{1,6}\s+(.+)$/
+
   def initialize(article)
     @article = article
   end
@@ -19,7 +21,7 @@ class PdfExporter
   private
 
   def typst_source
-    content = strip_markdown(@article.content || "")
+    content = markdown_to_typst(@article.content || "")
     topic = escape(@article.topic)
     rubric = escape(@article.rubric)
     date = @article.created_at.strftime("%d.%m.%Y %H:%M")
@@ -56,29 +58,63 @@ class PdfExporter
       #columns(2, gutter: 1.5em)[
         #line(length: 0pt)
         #{content}
-        #h(0.3em)#text(size: 7pt)[■]
       ]
     TYP
   end
 
-  def strip_markdown(text)
+  def markdown_to_typst(text)
+    lines = text.strip.split("\n")
+
+    author = extract_author(lines)
+    body = author ? lines[0...-2].join("\n").strip : lines.join("\n").strip
+
+    result = escape(body)
+    result = convert_inline(result)
+    result = convert_blocks(result)
+
+    result += " #text(size: 7pt)[■]"
+
+    if author
+      result += "\n\n#align(right)[#emph[#{escape(author)}]]"
+    end
+
+    result
+  end
+
+  def extract_author(lines)
+    trimmed = lines.map(&:strip).reject(&:empty?)
+    return nil if trimmed.size < 3
+
+    last = trimmed.last
+    return last if last.match?(/\A[А-ЯЁA-Z][а-яёa-z]+\s+[А-ЯЁA-Z][а-яёa-z]+\z/)
+
+    nil
+  end
+
+  def convert_inline(text)
     text
-      .gsub(/\*{1,3}(.+?)\*{1,3}/, '\1')
-      .gsub(/__(.+?)__/, '\1')
-      .gsub(/_(.+?)_/, '\1')
-      .gsub(/~~(.+?)~~/, '\1')
-      .gsub(/`(.+?)`/, '\1')
-      .gsub(/\[([^\]]+)\]\([^)]+\)/, '\1')
-      .then { |t| escape(t) }
+      .gsub(/\*\*\*(.+?)\*\*\*/) { "#text(weight: \"bold\")[#emph[#{$1}]]" }
+      .gsub(/\*\*(.+?)\*\*/) { "#text(weight: \"bold\")[#{$1}]" }
+      .gsub(/__(.+?)__/) { "#text(weight: \"bold\")[#{$1}]" }
+      .gsub(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/) { "#emph[#{$1}]" }
+      .gsub(/(?<!_)_(?!_)(.+?)(?<!_)_(?!_)/) { "#emph[#{$1}]" }
+      .gsub(/~~(.+?)~~/) { "#strike[#{$1}]" }
+      .gsub(/`(.+?)`/) { "#raw(\"#{$1.gsub('"', '\\"')}\")" }
+      .gsub(/\[([^\]]+)\]\([^)]+\)/) { "#underline[#{$1}]" }
+  end
+
+  def convert_blocks(text)
+    text
+      .gsub(/^\\>\s*(.+)$/) { "#block(inset: (left: 1.5em), stroke: (left: 2pt + gray))[#emph[#{$1}]]" }
+      .gsub(HEADING_RE) { "\n#text(size: 12pt, weight: \"bold\")[#{$1}]\n" }
   end
 
   def escape(text)
     text
       .gsub("\\", "\\\\")
-      .gsub("#", "\\#")
-      .gsub("$", "\\$")
-      .gsub("@", "\\@")
       .gsub("<", "\\<")
       .gsub(">", "\\>")
+      .gsub("$", "\\$")
+      .gsub("@", "\\@")
   end
 end
