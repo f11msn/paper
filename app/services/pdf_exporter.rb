@@ -21,8 +21,8 @@ class PdfExporter
   private
 
   def typst_source
-    content = markdown_to_typst(@article.content || "")
-    topic = escape(@article.topic)
+    headline, content = extract_headline_and_body(@article.content || "")
+    body = markdown_to_typst(content)
     rubric = escape(@article.rubric)
     date = @article.created_at.strftime("%d.%m.%Y %H:%M")
 
@@ -49,7 +49,7 @@ class PdfExporter
 
       #v(0.8em)
 
-      #text(size: 16pt, weight: "bold")[#{topic}]
+      #text(size: 16pt, weight: "bold")[#{headline}]
 
       #v(0.3em)
       #line(length: 100%, stroke: 0.3pt)
@@ -57,9 +57,22 @@ class PdfExporter
 
       #columns(2, gutter: 1.5em)[
         #line(length: 0pt)
-        #{content}
+        #{body}
       ]
     TYP
+  end
+
+  def extract_headline_and_body(text)
+    lines = text.strip.split("\n")
+    first = lines.first&.strip || ""
+
+    if first.match?(/\A\*\*(.+)\*\*\z/)
+      headline = escape(first.gsub(/\*\*/, ""))
+      rest = lines.drop(1).join("\n").strip
+      [headline, rest]
+    else
+      [escape(@article.topic), text.strip]
+    end
   end
 
   def markdown_to_typst(text)
