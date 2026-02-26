@@ -41,15 +41,20 @@ class OpenaiClient
       req.body = body
       req.options.on_data = proc do |chunk, _overall_size, _env|
         buffer << chunk
-        while (line_end = buffer.index("\n\n"))
-          raw_line = buffer.slice!(0..line_end + 1).strip
-          next if raw_line.empty?
+        while (line_end = buffer.index("\n"))
+          line = buffer.slice!(0..line_end).strip
+          next if line.empty?
+          next unless line.start_with?("data: ")
 
-          data = raw_line.delete_prefix("data: ")
+          data = line.delete_prefix("data: ")
           next if data == "[DONE]"
 
-          parsed = JSON.parse(data)
-          block.call(parsed)
+          begin
+            parsed = JSON.parse(data)
+            block.call(parsed)
+          rescue JSON::ParserError
+            next
+          end
         end
       end
     end
