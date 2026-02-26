@@ -25,27 +25,39 @@ class PdfExporter
     date = @article.created_at.strftime("%d.%m.%Y %H:%M")
 
     <<~TYP
-      #set page(margin: (x: 2cm, y: 2.5cm))
-      #set text(font: "New Computer Modern", size: 11pt, lang: "ru")
-      #set par(justify: true, leading: 0.8em)
+      #set page(margin: (x: 1.5cm, y: 2cm))
+      #set text(font: "New Computer Modern", size: 10pt, lang: "ru")
+      #set par(justify: true, leading: 0.7em, first-line-indent: 1.5em)
 
       #align(center)[
-        #text(size: 24pt, weight: "bold")[Ъ]
+        #text(size: 28pt, weight: "bold")[Ъ]
+        #v(0.2em)
+        #line(length: 100%, stroke: 1pt)
         #v(0.3em)
-        #line(length: 100%, stroke: 0.5pt)
-        #v(0.3em)
-        #text(size: 8pt, tracking: 2pt, upper[#{rubric}])
-        #h(1em)
-        #text(size: 8pt, fill: gray)[#{date}]
+        #grid(
+          columns: (1fr, auto, 1fr),
+          align: (left, center, right),
+          text(size: 7pt, tracking: 2pt, upper[#{rubric}]),
+          [],
+          text(size: 7pt, fill: gray)[#{date}],
+        )
+        #v(0.1em)
+        #line(length: 100%, stroke: 0.3pt)
       ]
 
-      #v(1em)
+      #v(0.8em)
 
-      #text(size: 18pt, weight: "bold")[#{topic}]
+      #text(size: 16pt, weight: "bold")[#{topic}]
 
-      #v(1em)
+      #v(0.3em)
+      #line(length: 100%, stroke: 0.3pt)
+      #v(0.5em)
 
-      #{content}
+      #columns(2, gutter: 1.5em)[
+        #line(length: 0pt)
+        #{content}
+        #h(0.3em)#text(size: 7pt)[■]
+      ]
     TYP
   end
 

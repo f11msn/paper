@@ -24,7 +24,7 @@
       <div class="border-t border-stone-300 mt-3 mb-6"></div>
 
       <% if @article.content.present? %>
-        <div class="article-body max-w-none article-end">
+        <div class="prose max-w-none leading-relaxed">
           <%= render_markdown(@article.content) %>
         </div>
       <% else %>
