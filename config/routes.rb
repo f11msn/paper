@@ -3,6 +3,7 @@ Rails.application.routes.draw do
 
   resources :articles, only: [:index, :new, :create, :show] do
     post :retry, on: :member
+    get :pdf, on: :member
     resource :stream, only: [:show], controller: "article_streams"
   end
 

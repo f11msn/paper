@@ -36,6 +36,16 @@ class ArticlesController < ApplicationController
     end
   end
 
+  def pdf
+    @article = Article.find(params[:id])
+    pdf_data = PdfExporter.new(@article).generate
+
+    send_data pdf_data,
+      filename: "#{@article.topic.parameterize}.pdf",
+      type: "application/pdf",
+      disposition: "inline"
+  end
+
   def retry
     @article = Article.find(params[:id])
     @article.update!(status: "generating", content: nil, api_log: nil, tool_calls_log: nil)
