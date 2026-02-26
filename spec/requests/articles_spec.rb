@@ -46,7 +46,7 @@ RSpec.describe "Articles", type: :request do
           system_prompt: "Ты журналист",
           temperature: 0.7,
           max_tokens: 1000,
-          model: "deepseek/deepseek-chat"
+          model: "deepseek/deepseek-v3.2"
         }
       }
 

@@ -7,7 +7,7 @@ class OpenaiClient
   attr_reader :last_request_body, :last_response_body
 
   DEFAULT_BASE_URL = "https://openrouter.ai/api/v1"
-  DEFAULT_MODEL = "deepseek/deepseek-chat"
+  DEFAULT_MODEL = "deepseek/deepseek-v3.2"
 
   def initialize(api_key:, base_url: DEFAULT_BASE_URL, model: DEFAULT_MODEL)
     @api_key = api_key

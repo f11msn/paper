@@ -10,7 +10,7 @@ RSpec.describe OpenaiClient do
       id: "chatcmpl-123",
       object: "chat.completion",
       created: 1_700_000_000,
-      model: "deepseek/deepseek-chat",
+      model: "deepseek/deepseek-v3.2",
       choices: [
         {
           index: 0,
@@ -74,7 +74,7 @@ RSpec.describe OpenaiClient do
 
       expect(WebMock).to have_requested(:post, "#{base_url}/chat/completions")
         .with(body: hash_including(
-          "model" => "deepseek/deepseek-chat",
+          "model" => "deepseek/deepseek-v3.2",
           "messages" => [{ "role" => "user", "content" => "Привет" }],
           "temperature" => 0.5,
           "max_tokens" => 2048
