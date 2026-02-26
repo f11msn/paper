@@ -1,6 +1,6 @@
 <div class="mb-6 flex items-center justify-between">
   <%= link_to "← Назад к архиву", articles_path, class: "font-sans text-sm text-stone-500 hover:text-stone-700" %>
-  <div class="flex gap-2">
+  <div class="flex gap-4">
     <% if @article.content.present? %>
       <%= link_to "📄 PDF", pdf_article_path(@article), target: "_blank", class: "bg-white border border-stone-300 text-stone-700 px-4 py-2 rounded font-sans text-sm hover:bg-stone-50" %>
     <% end %>
