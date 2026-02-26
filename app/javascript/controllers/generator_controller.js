@@ -1,4 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
+import { marked } from "marked"
+import remend from "remend"
 
 export default class extends Controller {
   static targets = ["form", "output", "content", "temperatureValue"]
@@ -46,11 +48,13 @@ export default class extends Controller {
     this.contentTarget.innerHTML = '<p class="text-stone-400 text-sm font-sans animate-pulse">Генерация...</p>'
 
     const eventSource = new EventSource(`/articles/${data.id}/stream`)
-
+    let rawMarkdown = ""
     let firstChunk = true
+
     eventSource.onmessage = (event) => {
       if (event.data === "[DONE]") {
         eventSource.close()
+        this.contentTarget.innerHTML = marked.parse(rawMarkdown)
         this.contentTarget.innerHTML += '<p class="mt-4 text-stone-400 text-sm font-sans">✓ Генерация завершена. <a href="/articles/' + data.id + '" class="underline">Открыть статью →</a></p>'
         return
       }
@@ -61,11 +65,13 @@ export default class extends Controller {
       }
 
       const text = JSON.parse(event.data)
-      this.contentTarget.innerHTML += text.replace(/\n/g, "<br>")
+      rawMarkdown += text
+      this.contentTarget.innerHTML = marked.parse(remend(rawMarkdown))
     }
 
     eventSource.onerror = () => {
       eventSource.close()
+      this.contentTarget.innerHTML = marked.parse(remend(rawMarkdown))
       this.contentTarget.innerHTML += '<p class="mt-4 text-red-500 text-sm font-sans">Соединение закрыто</p>'
     }
   }
