@@ -10,13 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_26_063423) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_25_203422) do
   create_table "articles", force: :cascade do |t|
     t.json "api_log"
     t.text "content"
     t.datetime "created_at", null: false
     t.integer "max_tokens", default: 4096, null: false
-    t.string "model", default: "deepseek/deepseek-v3.2", null: false
+    t.string "model", default: "deepseek/deepseek-chat", null: false
     t.string "rubric", null: false
     t.string "status", default: "pending", null: false
     t.text "system_prompt", null: false
