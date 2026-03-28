@@ -1,8 +1,8 @@
 # Ъ Paper
 
-Article generator in Kommersant newspaper style. Rails 8, DeepSeek via OpenRouter, OpenAI-compatible API.
+Генератор статей в стиле газеты «Коммерсантъ». Rails 8, DeepSeek через OpenRouter, OpenAI-совместимый API.
 
-Covers system messages, tool calling loop, streaming (SSE), temperature/max_tokens tuning. Full API exchange visualized in Debug Panel.
+System messages, tool calling loop, streaming (SSE), настройка temperature/max_tokens. Полный API-обмен визуализирован в Debug Panel.
 
 ## Быстрый старт
 
