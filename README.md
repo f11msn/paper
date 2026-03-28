@@ -1,10 +1,8 @@
 # Ъ Paper
 
-Учебный проект на Ruby on Rails для практического изучения OpenAI API протокола. Генерирует статьи в стиле газеты «Коммерсантъ» через DeepSeek (OpenRouter).
+Article generator in Kommersant newspaper style. Rails 8, DeepSeek via OpenRouter, OpenAI-compatible API.
 
-## Зачем
-
-Проект демонстрирует ключевые концепции работы с LLM через OpenAI-совместимый API. Каждая концепция реализована явно, с визуализацией полного API-обмена в Debug Panel.
+Covers system messages, tool calling loop, streaming (SSE), temperature/max_tokens tuning. Full API exchange visualized in Debug Panel.
 
 ## Быстрый старт
 
